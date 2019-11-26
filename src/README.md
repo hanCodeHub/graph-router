@@ -1,13 +1,13 @@
 # Shortest Path On A Graph
 
 ### Program entirely written in Java (JDK 11)
-_*No frameworks or libraries were used_
+_No frameworks or libraries were used_
 
 ### Description
 
 **Purpose**
 
-This is a program developed as a term project for MET CS 526 at Boston University. The goal is to use heuristic algorithms to find the shortest route between nodes from any node to node Z.
+This is a program developed as a term project for MET CS 526 at Boston University. The goal is to use heuristic algorithms and Java data structures to find the shortest route between nodes from any node to node Z.
 
 Provided are input files that contain:
 * matrix of each node mapped to adjacent nodes and their distance from each other.
