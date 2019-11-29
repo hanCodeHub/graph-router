@@ -3,6 +3,10 @@ public class GraphRouter {
 
         var map = new NodeMap(26);
         map.readMatrix();
+        map.readList();
         map.displayNodes();
+
     }
+
+    
 }

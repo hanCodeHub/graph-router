@@ -5,25 +5,29 @@ import java.util.*;
 public class NodeMap {
     /* path to file directory, change if necessary
     * txt files are outside the src directory, but inside project directory */
-    private static final String PATH = new File("").getAbsolutePath()
+    private static final String GRAPHPATH = new File("").getAbsolutePath()
             .concat("/graph_input.txt");
-    private static File inputFile = new File(PATH);
+    private static final String LISTPATH = new File("").getAbsolutePath()
+            .concat("/direct_distance.txt");
 
-    // global variables for storing all nodes and their names
+    // containers for storing all nodes and their names
     private HashMap<String, Node> map;
     private String[] names;
 
-    // constructor with initial capacity
+    // constructors with initial capacity
     public NodeMap(int initialCap) { this.map = new HashMap<>(initialCap); }
+    public NodeMap() { this(26); }
 
     // Nodes are added and retrieved with their name as key
     public void addNode(Node node) { map.put(node.getName(), node); }
     public Node getNode(String name) { return map.get(name); }
 
 
-    /* matrix of node mappings read from input file */
+    /* reads matrix of Nodes from input file, and generates Nodes in map */
     public void readMatrix() {
         try {
+            // input file defined with path to graph_input.txt
+            var inputFile = new File(GRAPHPATH);
             var scan = new Scanner(inputFile);
 
             // top row scanned into an array of letters to be used as names for each Node
@@ -43,6 +47,33 @@ public class NodeMap {
             System.out.println("File not found \n");
             e.printStackTrace();
         }
+
+    }
+
+    /* reads list of direct distance to Z from each Node in input file */
+    public void readList() {
+        try {
+            // inputFile defined with path to direct_distance.txt
+            var inputFile = new File(LISTPATH);
+            var scan = new Scanner(inputFile);
+
+            // each scan is a [name, distance] pair
+            while (scan.hasNextLine()) {
+                String[] rowScan = scan.nextLine().split(" ");
+                var name = rowScan[0];
+                var currentNode = map.get(name);
+
+                // if name exists as a current node in the map, set its dToZ value
+                if (currentNode != null) {
+                    currentNode.setdToZ(Integer.parseInt(rowScan[1]));
+                }
+
+            }
+
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found \n");
+            e.printStackTrace();
+        }
     }
 
     /* adds adjacent Nodes to an existing Node in map
@@ -53,7 +84,7 @@ public class NodeMap {
         // nodeName is the first letter of each row
         String nodeName = rowScan[0];
 
-        // values in a row only added to temp list if it's an integer
+        // values in a row only added to rowVals list if it's an integer
         for (String s : rowScan) {
             try {
                 rowVals.add(Integer.parseInt(s));
@@ -62,10 +93,11 @@ public class NodeMap {
             }
         }
 
-        // integers are only used to create adjacent Nodes if > 0
+        // integers from rowVals are only used to create adjacent Nodes if > 0
         for (int i = 0; i < rowVals.size(); i++) {
             var weight = rowVals.get(i);
-            if (weight > 0) {  // if value is a real weight
+            if (weight > 0) {  // if value is a real weight,
+                // then it's added to current node adjacents with nodeName as key
                 var currentNode = map.get(names[i]);
                 currentNode.addAdjacent(nodeName, weight);
             }
@@ -73,12 +105,19 @@ public class NodeMap {
         rowVals.clear(); // clear the row values for next row
     }
 
-    /* FOR DEBUGGING ONLY
-    shows all Nodes in the map, and their adjacent Nodes */
+    /* adds direct distance (dToZ) values to each Node */
+    private void addDToZ() {
+
+    }
+
+    /* FOR DEBUGGING ONLY - shows all Nodes and their properties in the map */
     public void displayNodes () {
         for (Map.Entry<String, Node> nodeEntry : map.entrySet()) {
-            System.out.println("name: " + nodeEntry.getValue().getName() +
-                    " | adjacents: " + nodeEntry.getValue().getAdjacents());
+            var node = nodeEntry.getValue();
+            System.out.println("node: " + node.getName() +
+                    " | adjacents: " + node.getAdjacents() +
+                    " | direct distance: " + node.getdToZ()
+            );
         }
     }
 

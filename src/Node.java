@@ -3,7 +3,7 @@ import java.util.HashMap;
 public class Node {
     private String name;
     private HashMap<String, Integer> adjacents; // each adjacent Node has an int weight value
-    private int dToZ;
+    private int dToZ; // distance from this Node to Node Z
 
     // constructors
     public Node(String name, HashMap<String, Integer> adjacents, int dToZ) {
