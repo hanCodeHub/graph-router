@@ -1,7 +1,4 @@
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
 public class GraphRouter {
     private static Scanner userScan = new Scanner(System.in);
@@ -17,6 +14,8 @@ public class GraphRouter {
     private static Stack<String> pathShortest = new Stack<>();
     private static int pathLength = 0;
 
+
+    /* MAIN PROGRAM */
     public static void main(String[] args) {
 
         // Node data is read into map
@@ -27,42 +26,57 @@ public class GraphRouter {
         String nameInput = readUserInput();
         System.out.println("User selected node " + nameInput);
 
+        // Add the selected Node to paths and start the current tracker
         current = map.getNode(nameInput);
         pathSequence.add(current.getName());
         pathShortest.add(current.getName());
 
+        // traverses the map by continuously selecting next Node
         while (!current.getName().equals("Z")) {
-            // get a Set of adjacent Nodes to current Node;
-            var adjacents = current.getAdjacents().keySet();
 
-            // DEBUGGING ONLY - show dd of each adjacent Node
-            System.out.println("current node: " + current);
-            for (String name : adjacents) {
-                var dd = map.getNode(name).getDd();
-                System.out.println(name + ": dd(" + name + ")" + " = " + dd);
-            }
+            // get a Set of adjacent Nodes relative to current Node;
+            var adjacents = current.getAdjacents().keySet();
+            showAdjacents(adjacents, current);  // for debugging
 
             // select the next current node from adjacents based on algorithm 1
             var selected = selectByDd(adjacents);
+            System.out.println(selected + " is selected\n");
+
+            // add selected to paths
             pathSequence.add(selected.getName());
+            pathShortest.add(selected.getName());
+
+            // if no valid paths remaining, backtrack and re-select a new Node
+            if (!hasValidPaths(selected)) {
+                backtrack();
+                continue;
+            };
+
             // get edge weight from current node to next selected and add to pathLength
             pathLength += current.getAdjacents().get(selected.getName());
+
             // update current node with the selected node
             current = selected;
-            System.out.println(selected + " is selected\n");
+
         }
 
         // show path results
-        System.out.println("\nPath taken: ");
-        System.out.println(pathSequence.toString());
+        System.out.println("Total path taken: " + pathSequence.toString());
+        System.out.println("Shortest path taken: " + pathShortest.toString());
         System.out.println("Total length: " + pathLength);
 
-
     }
+    /* END MAIN PROGRAM */
+
 
     /* returns the Node selection based on the shortest path of algorithm 1
     * only direct distance (dd) is considered */
     private static Node selectByDd(Set<String> adjacents) {
+
+        // cleanse adjacent list of old nodes already traversed
+        for (String oldNode : pathSequence) {
+            adjacents.remove(oldNode);
+        }
 
         // selected Node will be returned as the next Node in shortest path
         var iter = adjacents.iterator();
@@ -71,10 +85,35 @@ public class GraphRouter {
         // each next node's dd is compared with dd of currently selected node
         while (iter.hasNext()) {
             Node next = map.getNode(iter.next());
+            // node selected only if it was not in path before and has smaller dd
             if (next.getDd() < selected.getDd())
                 selected = next;
         }
         return selected;
+    }
+
+    /* checks if there are valid paths remaining from the given Node */
+    private static Boolean hasValidPaths(Node thisNode) {
+        var adjacents = thisNode.getAdjacents().keySet();
+
+        // if there is an adjacent not in pathSequence history, then there is a valid path
+        for (String nodeName : adjacents) {
+            if (!pathSequence.contains(nodeName))
+                return true;
+        }
+        // otherwise dead end
+        System.out.println("Route has hit a dead end");
+        return false;
+    }
+
+    /* backtracks to previous node and pops the current one off the shortest path */
+    private static void backtrack() {
+        // name of previous node
+        var prevName = pathSequence.get(pathSequence.size() - 2);
+        current = map.getNode(prevName);
+        // remove current from shortest path and add previous to total path
+        pathShortest.pop();
+        pathSequence.add(prevName);
     }
 
     /* reads Node name from user input and validate against existing Nodes in map
@@ -108,6 +147,15 @@ public class GraphRouter {
             break;
         }
             return name;
+        }
+
+        /* // FOR DEBUGGING ONLY - show dd of each adjacent Node relative to thisNode */
+        private static void showAdjacents(Set<String> adjacents, Node thisNode) {
+            System.out.println("current node: " + thisNode + "\nadjacent nodes: ");
+            for (String name : adjacents) {
+                var dd = map.getNode(name).getDd();
+                System.out.println(name + ": dd(" + name + ")" + " = " + dd);
+            }
         }
 
     }
