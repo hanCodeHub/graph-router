@@ -22,6 +22,10 @@ public class NodeMap {
     public void addNode(Node node) { map.put(node.getName(), node); }
     public Node getNode(String name) { return map.get(name); }
 
+    // getter for the array of node names
+    public String[] getNames() {
+        return names;
+    }
 
     /* reads matrix of Nodes from input file, and generates Nodes in map */
     public void readMatrix() {
@@ -50,7 +54,7 @@ public class NodeMap {
 
     }
 
-    /* reads list of direct distance to Z from each Node in input file */
+    /* reads list of direct distances from input file and set dd of each Node */
     public void readList() {
         try {
             // inputFile defined with path to direct_distance.txt
@@ -63,9 +67,9 @@ public class NodeMap {
                 var name = rowScan[0];
                 var currentNode = map.get(name);
 
-                // if name exists as a current node in the map, set its dToZ value
+                // if name exists as a current node in the map, set its dd value
                 if (currentNode != null) {
-                    currentNode.setdToZ(Integer.parseInt(rowScan[1]));
+                    currentNode.setDd(Integer.parseInt(rowScan[1]));
                 }
 
             }
@@ -105,24 +109,15 @@ public class NodeMap {
         rowVals.clear(); // clear the row values for next row
     }
 
-    /* adds direct distance (dToZ) values to each Node */
-    private void addDToZ() {
-
-    }
-
     /* FOR DEBUGGING ONLY - shows all Nodes and their properties in the map */
     public void displayNodes () {
         for (Map.Entry<String, Node> nodeEntry : map.entrySet()) {
             var node = nodeEntry.getValue();
             System.out.println("node: " + node.getName() +
                     " | adjacents: " + node.getAdjacents() +
-                    " | direct distance: " + node.getdToZ()
+                    " | direct distance: " + node.getDd()
             );
         }
     }
 
-    @Override
-    public String toString() {
-        return map.toString();
-    }
 }
