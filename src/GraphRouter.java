@@ -39,7 +39,7 @@ public class GraphRouter {
             showAdjacents(adjacents, current);  // for debugging
 
             // select the next current node from adjacents based on algorithm 1
-            var selected = selectByDd(adjacents);
+            var selected = selectByWeightAndDd(adjacents);
             System.out.println(selected + " is selected\n");
 
             // add selected to paths
@@ -78,15 +78,43 @@ public class GraphRouter {
             adjacents.remove(oldNode);
         }
 
-        // selected Node will be returned as the next Node in shortest path
+        // selected Node initialized as first Node on the list
+        var iter = adjacents.iterator();
+        var selected = map.getNode(iter.next());
+
+        // selection made by comparing next Node dd with that of currently selected Node
+        while (iter.hasNext()) {
+            Node next = map.getNode(iter.next());
+
+            // next node selected only if it has smaller dd
+            if (next.getDd() < selected.getDd())
+                selected = next;
+        }
+        return selected;
+    }
+
+    /* returns the Node selection based on the shortest path of algorithm 2
+    * direct distance (dd) + edge weight of adjacent Node is considered */
+    private static Node selectByWeightAndDd(Set<String> adjacents) {
+        // cleanse adjacent list of old nodes already traversed
+        for (String oldNode : pathSequence) {
+            adjacents.remove(oldNode);
+        }
+
+        // selected Node initialized as first Node on the list
         var iter = adjacents.iterator();
         var selected = map.getNode(iter.next());
 
         // each next node's dd is compared with dd of currently selected node
         while (iter.hasNext()) {
             Node next = map.getNode(iter.next());
-            // node selected only if it was not in path before and has smaller dd
-            if (next.getDd() < selected.getDd())
+
+            // weights retrieved for the selected Node and next Node relative to current
+            var weightSelected = current.getAdjacents().get(selected.getName());
+            var weightNext = current.getAdjacents().get(next.getName());
+
+            // next node selected only if it has smaller weight + dd
+            if (next.getDd() + weightNext < selected.getDd() + weightSelected)
                 selected = next;
         }
         return selected;
@@ -149,7 +177,7 @@ public class GraphRouter {
             return name;
         }
 
-        /* // FOR DEBUGGING ONLY - show dd of each adjacent Node relative to thisNode */
+        /* FOR DEBUGGING ONLY - show dd of each adjacent Node relative to thisNode */
         private static void showAdjacents(Set<String> adjacents, Node thisNode) {
             System.out.println("current node: " + thisNode + "\nadjacent nodes: ");
             for (String name : adjacents) {
