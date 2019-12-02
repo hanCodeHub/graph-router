@@ -1,11 +1,11 @@
 import java.util.*;
 
-public class GraphRouter {
+public class Project {
     private static Scanner userScan = new Scanner(System.in);
     private static String nameInput = "";
 
     // the current map used for this route with no more than 26 Nodes
-    private static NodeMap map = new NodeMap(26);
+    private static NodeMap map = new NodeMap();
 
     // current tracks the current Node in the map as a String reference
     private static Node current = null;
@@ -33,7 +33,6 @@ public class GraphRouter {
         initiateRoute();
 
         while (!current.getName().equals("Z")) {
-
             // get a Set of adjacent Nodes relative to current Node;
             Set<String> adjacents = current.getAdjacents().keySet();
 
@@ -59,10 +58,8 @@ public class GraphRouter {
         // show path results
         System.out.println(getResults("Algorithm 1"));
 
-
         resetRoute();  // ------- all trackers cleared for next algorithm -----------
         System.out.println("-------------------------------------");
-
 
         // traverses the map by continuously selecting next Node with algorithm 2
         System.out.println("Algorithm 2:\n");
@@ -70,7 +67,6 @@ public class GraphRouter {
         initiateRoute();
 
         while (!current.getName().equals("Z")) {
-
             // get a Set of adjacent Nodes relative to current Node;
             Set<String> adjacents = current.getAdjacents().keySet();
 
@@ -109,21 +105,9 @@ public class GraphRouter {
         System.out.println("Walking from " + current);
     }
 
-    /* reset the route by clearing the map and all trackers */
-    private static void resetRoute() {
-        // map data is reset
-        map = new NodeMap(26);
-        map.readMatrix();
-        map.readList();
-        pathSequence = new ArrayList<>();
-        pathShortest = new Stack<>();
-        pathLength = 0;
-    }
-
     /* returns the Node selection based on the shortest path of algorithm 1
     * only direct distance (dd) is considered */
     private static Node selectByDd(Set<String> adjacents) {
-
         // cleanse adjacent list of old nodes already traversed
         for (String oldNode : pathSequence) {
             adjacents.remove(oldNode);
@@ -175,7 +159,7 @@ public class GraphRouter {
     private static Boolean hasValidPaths(Node thisNode) {
         var adjacents = thisNode.getAdjacents().keySet();
 
-        // if there is an adjacent not in pathSequence history, then there is a valid path
+        // if an adjacent Node is not in pathSequence history, then there is a valid path
         for (String nodeName : adjacents) {
             if (!pathSequence.contains(nodeName))
                 return true;
@@ -186,21 +170,56 @@ public class GraphRouter {
 
     /* backtracks to previous Node and pops the current one off the shortest path */
     private static void backtrack() {
-        System.out.println("Path has hit a dead end. Walking back to " +
-                map.getNode(pathSequence.get(pathSequence.size() - 2))); // previous Node
+        // set current to previous Node
+        var prevNode = map.getNode(pathSequence.get(pathSequence.size() - 2));
+        current = prevNode;
+        System.out.println("Path has hit a dead end. Walking back to " + prevNode);
 
-        // name of previous Node
-        var prevName = pathSequence.get(pathSequence.size() - 2);
-        current = map.getNode(prevName);
         // remove current from shortest path and add previous to total path
         pathShortest.pop();
-        pathSequence.add(prevName);
+        pathSequence.add(prevNode.getName());
     }
 
+    /* reset the route by clearing the map and all trackers */
+    private static void resetRoute() {
+        // map data is reset
+        map = new NodeMap();
+        map.readMatrix();
+        map.readList();
+        // paths data structures reset
+        pathSequence = new ArrayList<>();
+        pathShortest = new Stack<>();
+        pathLength = 0;
+    }
 
+    /* returns the path results of an algorithm on the console */
+    private static String getResults(String algName) {
+        var resultString = new StringBuilder(
+                "\n___Displaying Results for " + algName + "___\n"
+        );
+
+        // every node traversed in path
+        resultString.append("Sequence of all nodes: ");
+        for (int i = 0; i < pathSequence.size() - 1; i++) {
+            resultString.append(pathSequence.get(i)).append(" -> ");
+        }
+        resultString.append(pathSequence.get(pathSequence.size() - 1)).append("\n\n");
+
+        // the shortest path found by algorithm
+        resultString.append("Shortest path: ");
+        for (int i = 0; i < pathShortest.size() - 1; i++) {
+            resultString.append(pathShortest.get(i)).append(" -> ");
+        }
+        resultString.append(pathShortest.get(pathShortest.size() - 1)).append("\n\n");
+
+        // total length of shortest path
+        resultString.append("Shortest path length: ").append(pathLength).append("\n\n");
+
+        return resultString.toString();
+    }
 
     /* reads Node name from user input and validate against existing Nodes in map
-    * the validity of user input depends on what nodes are available in input files */
+     * the validity of user input depends on what nodes are available in input files */
     private static String readUserInput() {
         String name;  // will be returned after validation
 
@@ -229,42 +248,16 @@ public class GraphRouter {
             name = node;
             break;
         }
-            return name;
-        }
-
-        /* returns the path results of an algorithm on the console */
-        private static String getResults(String algName) {
-            var resultString = new StringBuilder(
-                    "\n___Displaying Results for " + algName + "___\n"
-            );
-
-            // every node traversed in path
-            resultString.append("Sequence of all nodes: ");
-            for (int i = 0; i < pathSequence.size() - 1; i++) {
-                resultString.append(pathSequence.get(i)).append(" -> ");
-            }
-            resultString.append(pathSequence.get(pathSequence.size() - 1)).append("\n\n");
-
-            // the shortest path found by algorithm
-            resultString.append("Shortest path: ");
-            for (int i = 0; i < pathShortest.size() - 1; i++) {
-                resultString.append(pathShortest.get(i)).append(" -> ");
-            }
-            resultString.append(pathShortest.get(pathShortest.size() - 1)).append("\n\n");
-
-            // total length of shortest path
-            resultString.append("Shortest path length: ").append(pathLength).append("\n\n");
-
-            return resultString.toString();
-        }
-
-        /* FOR DEBUGGING ONLY - show dd of each adjacent Node relative to thisNode */
-        private static void showAdjacents(Set<String> adjacents, Node thisNode) {
-            System.out.println("current node: " + thisNode + "\nadjacent nodes: ");
-            for (String name : adjacents) {
-                var dd = map.getNode(name).getDd();
-                System.out.println(name + ": dd(" + name + ")" + " = " + dd);
-            }
-        }
-
+        return name;
     }
+
+    /* FOR DEBUGGING ONLY - show dd of each adjacent Node relative to thisNode */
+    private static void showAdjacents(Set<String> adjacents, Node thisNode) {
+        System.out.println("current node: " + thisNode + "\nadjacent nodes: ");
+        for (String name : adjacents) {
+            var dd = map.getNode(name).getDd();
+            System.out.println(name + ": dd(" + name + ")" + " = " + dd);
+        }
+    }
+
+}

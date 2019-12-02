@@ -27,7 +27,7 @@ public class NodeMap {
         return names;
     }
 
-    /* reads matrix of Nodes from input file, and generates Nodes in map */
+    /* reads matrix of Nodes and adjacents from input file, and add them to map */
     public void readMatrix() {
         try {
             // input file defined with path to graph_input.txt
