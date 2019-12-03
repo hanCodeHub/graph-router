@@ -105,8 +105,10 @@ public class Project {
         System.out.println("Walking from " + current);
     }
 
-    /* returns the Node selection based on the shortest path of algorithm 1
-    * only direct distance (dd) is considered */
+    /* ALGORITHM 1
+    Input: adjacents is a Set of string of Node names adjacent to current Node
+    Output: returns the Node selected from adjacents based on the smallest dd value
+    */
     private static Node selectByDd(Set<String> adjacents) {
         // cleanse adjacent list of old nodes already traversed
         for (String oldNode : pathSequence) {
@@ -128,8 +130,10 @@ public class Project {
         return selected;
     }
 
-    /* returns the Node selection based on the shortest path of algorithm 2
-    * direct distance (dd) + edge weight of adjacent Node is considered */
+    /* ALGORITHM 2
+    Input: adjacents is a Set of string of Node names adjacent to current Node
+    Output: returns the Node selected from adjacents based on smallest dd value + edge weight
+    */
     private static Node selectByWeightAndDd(Set<String> adjacents) {
         // cleanse adjacent list of old nodes already traversed
         for (String oldNode : pathSequence) {
@@ -155,7 +159,10 @@ public class Project {
         return selected;
     }
 
-    /* checks if there are valid paths remaining from the given Node */
+    /* checks if there are valid paths remaining from the given Node
+    Input: a Node object selected by one of the selection algorithms
+    Output: true or false
+    */
     private static Boolean hasValidPaths(Node thisNode) {
         var adjacents = thisNode.getAdjacents().keySet();
 
@@ -192,7 +199,10 @@ public class Project {
         pathLength = 0;
     }
 
-    /* returns the path results of an algorithm on the console */
+    /* returns the path results of an algorithm on the console
+    Input: a String of the algorithm name used to obtain the current results
+    Output: a String that contains the paths results concatenated by a StringBuilder
+    */
     private static String getResults(String algName) {
         var resultString = new StringBuilder(
                 "\n___Displaying Results for " + algName + "___\n"
